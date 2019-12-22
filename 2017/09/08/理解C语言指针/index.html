@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en,zh-Hans,default">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Computer Science,C/C++," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="数据、指令和内存 程序的数据和指令存放在同一内存空间 虚拟存储空间的两个关键要素：内存地址+类型 指针是对内存区域的抽象：指针变量存放目标对象的内存地址">
+<meta name="keywords" content="Computer Science,C&#x2F;C++">
+<meta property="og:type" content="article">
+<meta property="og:title" content="理解C语言指针">
+<meta property="og:url" content="http://ScarlettHuang.cn/2017/09/08/理解C语言指针/index.html">
+<meta property="og:site_name" content="Scarlett Huang | Blog">
+<meta property="og:description" content="数据、指令和内存 程序的数据和指令存放在同一内存空间 虚拟存储空间的两个关键要素：内存地址+类型 指针是对内存区域的抽象：指针变量存放目标对象的内存地址">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2019-06-07T11:41:23.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="理解C语言指针">
+<meta name="twitter:description" content="数据、指令和内存 程序的数据和指令存放在同一内存空间 虚拟存储空间的两个关键要素：内存地址+类型 指针是对内存区域的抽象：指针变量存放目标对象的内存地址">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"always","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ScarlettHuang.cn/2017/09/08/理解C语言指针/"/>
+
+
+
+
+
+  <title>理解C语言指针 | Scarlett Huang | Blog</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-141530033-1', 'auto');
+  ga('send', 'pageview');
+</script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Scarlett Huang | Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-know-me">
+          <a href="https://www.scarletthuang.cn" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            know me
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            Search
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="Searching..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ScarlettHuang.cn/2017/09/08/理解C语言指针/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Scarlett Huang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Scarlett Huang | Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">理解C语言指针</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-09-08T00:58:20+08:00">
+                2017-09-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Science/" itemprop="url" rel="index">
+                    <span itemprop="name">Computer Science</span>
+                  </a>
+                </span>
+
+                
+                
+                  , 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Computer-Science/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/09/08/理解C语言指针/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/09/08/理解C语言指针/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="数据、指令和内存"><a href="#数据、指令和内存" class="headerlink" title="数据、指令和内存"></a>数据、指令和内存</h1><ul>
+<li>程序的数据和指令存放在同一内存空间</li>
+<li>虚拟存储空间的两个关键要素：内存地址+类型</li>
+<li>指针是对内存区域的抽象：指针变量存放目标对象的内存地址<a id="more"></a>   
+<h1 id="定义和使用指针"><a href="#定义和使用指针" class="headerlink" title="定义和使用指针"></a>定义和使用指针</h1><h2 id="指针的定义"><a href="#指针的定义" class="headerlink" title="指针的定义"></a>指针的定义</h2></li>
+<li>使用* 标记指针，定义方式与定义变量一样</li>
+<li><p>在同一个变量定义语句中，基本数据类型只能有一个，但是可以有多个形式相同或不同的声明符。这也就是说，同一个语句可以定义出不同类型的变量。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">int *ip1, *ip2;         // ip1 和 ip2 都是指向 int 类型变量的指针变量</span><br><span class="line">double d, *dp;          // d 是 double 类型变量，dp 是指向 double 类型变量的指针变量</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>可以定义一个指向这一指针的指针</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">int val = 1024</span><br><span class="line">int *p = &amp;val</span><br><span class="line">int **pp = &amp;p</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>pp 是一个指向指向 int 类型变量的指针的指针。</p>
+<h2 id="获取对象的地址"><a href="#获取对象的地址" class="headerlink" title="获取对象的地址"></a>获取对象的地址</h2><ul>
+<li>用&amp;取地址符号来获取对象地址</li>
+<li>指针的类型和对象的类型需要严格匹配<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> val = <span class="number">42</span>;</span><br><span class="line"><span class="keyword">int</span> *p  = &amp;val;     <span class="comment">// &amp;val 返回变量 val 的地址，记录在指向 int 类型变量的指针里</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="访问指针指向的对象"><a href="#访问指针指向的对象" class="headerlink" title="访问指针指向的对象"></a>访问指针指向的对象</h2><ul>
+<li>通过解引用指针 p 来访问变量 val<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> val = <span class="number">1004</span></span><br><span class="line"><span class="keyword">int</span> *p = &amp;val</span><br><span class="line"><span class="built_in">cout</span> &lt;&lt; *p &lt;&lt; <span class="built_in">endl</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="空指针和空类型的指针"><a href="#空指针和空类型的指针" class="headerlink" title="空指针和空类型的指针"></a>空指针和空类型的指针</h2><ul>
+<li>空指针是不指向任何对象的指针,字面值是 NULL，它定义在 stdlib 当中</li>
+<li>空类型的指针，指的是形如 void *pv 的指针。这是一类特殊的指针；这里的空类型，不是说没有类型，而是说空类型的指针，可以用于存储任意类型对象的地址。</li>
+<li>由于空类型的指针可以接受任意类型对象的地址，所以，当编译器拿到一个空类型的指针的时候，它无法知道应该按照何种方式解释和使用指针中记录地址中的内容。因此，空类型指针能够做的事情非常有限：做指针之间的比较、作为函数的输入或输出、赋值给另外一个空类型指针。</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> *p1 = <span class="literal">NULL</span>;         <span class="comment">// C 风格的空指针初始化</span></span><br><span class="line"><span class="keyword">int</span> *p2 = <span class="literal">nullptr</span>;      <span class="comment">// C++ 风格的空指针初始化</span></span><br><span class="line"><span class="keyword">int</span> *p3 = <span class="number">0</span>;            <span class="comment">// 使用字面值常量 0 初始化空指针</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="literal">nullptr</span> == p1) &#123;    <span class="comment">// 思考一下为什么不是 p1 == nullptr</span></span><br><span class="line">    ; <span class="comment">// do something</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">double</span> pi = <span class="number">3.14</span>;</span><br><span class="line"><span class="keyword">void</span> *pv = &amp;pi;     <span class="comment">// 使用 void * 存放了一个 double 类型对象的地址</span></span><br><span class="line"><span class="keyword">double</span> *pd = &amp;pi;</span><br><span class="line">pd = pv;            <span class="comment">// 错误：不能将空类型的指针赋值给其他类型的指针</span></span><br><span class="line">pv = pd;            <span class="comment">// 正确：空类型的指针可以接受任意类型的指针赋值</span></span><br><span class="line">pd = (<span class="keyword">double</span> *)pv;  <span class="comment">// 正确：C 风格的强制类型转换</span></span><br><span class="line">pd = <span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">double</span> *&gt;(pv); <span class="comment">// 正确：C++ 风格的强制类型转换</span></span><br></pre></td></tr></table></figure>
+<h2 id="const与指针"><a href="#const与指针" class="headerlink" title="const与指针"></a>const与指针</h2><ul>
+<li>定义常量，只需要在基本类型前，加上 const 关键字即可</li>
+<li>常量的值在生存期内不允许改变</li>
+<li>const与指针连用有4种情况：</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> val = <span class="number">0</span>;                <span class="comment">// int 型变量</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> cnst = <span class="number">1</span>;         <span class="comment">// int 型常量</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> *pi = &amp;val;             <span class="comment">// pi 本身是变量，通过 pi 访问的也是变量</span></span><br><span class="line">                            <span class="comment">// 正确：将变量地址赋值给变量的指针</span></span><br><span class="line">pi = &amp;cnst;                 <span class="comment">// 错误：不允许将常量的地址赋值给变量的指针</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> *pci = &amp;cnst;     <span class="comment">// pci 本身是变量，通过 pci 访问的是常量 (point to const)</span></span><br><span class="line">                            <span class="comment">// 正确：将常量地址赋值给常量的指针</span></span><br><span class="line">pci = &amp;val;                 <span class="comment">// 正确：允许将变量地址赋值给常量的指针</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> *<span class="keyword">const</span> cpi = &amp;val;      <span class="comment">// cpi 本身是常量，通过 cpi 访问的是变量</span></span><br><span class="line">                            <span class="comment">// 正确：允许将变量地址赋值给变量的指针</span></span><br><span class="line"><span class="keyword">int</span> fake = <span class="number">2</span>;               <span class="comment">// int 型变量</span></span><br><span class="line">cpi = &amp;fake;                <span class="comment">// 错误：cpi 本身是常量，不能在定义之外赋值</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> *<span class="keyword">const</span> cpci = &amp;val;</span><br><span class="line">                            <span class="comment">// cpci 本身是常量，通过 cpci 访问的也是常量</span></span><br><span class="line">                            <span class="comment">// 正确：允许将变量地址赋值给常量的指针</span></span><br><span class="line">cpci = &amp;fake;               <span class="comment">// 错误：cpci 本身是常量，不能在定义之外赋值</span></span><br><span class="line">cpci = &amp;cnst;               <span class="comment">// 错误：cpci 本身是常量，不能在定义之外赋值，哪怕是常量的地址</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>变量可以是常量，而指针本身也可以是常量。因此在变量和指针两个维度，都可以选择是否为常量</li>
+<li>为了区分这两个维度，我们引入顶层 const 和底层 const 的概念：<blockquote>
+<p>顶层 const：指针本身是常量。此时，指针在定义初始化之外，不能被赋值修改。称指针为指针常量。<br>层 const：指针指向的变量是常量。此时，不能通过解引用指针的方式，修改变量的值。称指针为常量的指针。</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="指针与数组"><a href="#指针与数组" class="headerlink" title="指针与数组"></a>指针与数组</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> nums[] = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;;</span><br><span class="line"><span class="keyword">int</span> *p = &amp;(nums[<span class="number">0</span>]);</span><br><span class="line"><span class="keyword">if</span> (p == nums) &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"true!\n"</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">size_t</span> i = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>; i != <span class="number">3</span>; ++i) &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"%d\n"</span>, p[i]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>数组指针可自增，可加减运算</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> nums[] = &#123;<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>&#125;;</span><br><span class="line"><span class="keyword">size_t</span> len = <span class="keyword">sizeof</span>(nums) / <span class="keyword">sizeof</span>(nums[<span class="number">0</span>]);</span><br><span class="line"><span class="keyword">int</span> *iter, end = nums[len];     <span class="comment">// end 是尾后指针</span></span><br><span class="line"><span class="keyword">for</span> (iter = nums; iter != end; ++iter) &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"%d\n"</span>, *iter);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>两个指针如果指向同一个数组中的元素，那么它们可以做差    </p>
+</li>
+<li>数组指针与整数的加减，实际是将指针沿着数组进行移动，得到的结果还是一个指针。既然结果是指针，那么就可以解引用，访问数组中的元素  </li>
+</ul>
+<h2 id="函数与指针"><a href="#函数与指针" class="headerlink" title="函数与指针"></a>函数与指针</h2><h3 id="让函数返回一个数组的指针"><a href="#让函数返回一个数组的指针" class="headerlink" title="让函数返回一个数组的指针"></a>让函数返回一个数组的指针</h3><ul>
+<li>函数在返回时会对返回值拷贝</li>
+<li>数组不能被拷贝，函数无法直接返回数组，但可返回数组的指针</li>
+<li>如何定义一个返回数组指针的函数：element_type </li>
+</ul>
+<p>(*func(param_list))[dimension]</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> arr[<span class="number">10</span>]</span><br><span class="line"><span class="keyword">int</span> *parr[<span class="number">10</span>]   <span class="comment">//    parr 是一个数组，长度是 10，元素类型是 int *，也就是数组中存的是指针</span></span><br><span class="line"><span class="keyword">int</span> (*p)[<span class="number">10</span>]=&amp;arr</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> (*func(param_list))[<span class="number">10</span>];</span><br><span class="line">                    <span class="comment">// 正确：func 是一个函数，param_list 是它的参数</span></span><br><span class="line">                    <span class="comment">// 它返回的是一个指针</span></span><br><span class="line">                    <span class="comment">// 这个指针指向了一个长度为 10 元素类型是 int 型的数组</span></span><br></pre></td></tr></table></figure>
+<h3 id="函数的指针"><a href="#函数的指针" class="headerlink" title="函数的指针"></a>函数的指针</h3><ul>
+<li>一个函数的类型，取决于它的输入和输出。这也就是说，一个函数的类型，应当包含它的返回值类型和参数列表</li>
+<li><p>定义一个指向某类型的函数指针</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">isEqual</span><span class="params">(<span class="keyword">int</span>, <span class="keyword">int</span>)</span></span>;</span><br><span class="line"><span class="keyword">bool</span> (*pfunc)(<span class="keyword">int</span>, <span class="keyword">int</span>) = &amp;isEqual;     <span class="comment">// 定义了一个函数指针，指向 isEqual</span></span><br><span class="line"><span class="keyword">bool</span> (*pfunc)(<span class="keyword">int</span>, <span class="keyword">int</span>) = isEqual;      <span class="comment">// 一个等价定义</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>pfunc 就是一个函数指针，它指向一个 bool (int, int) 类型的函数。也就是说，这类函数接收两个 int 型的参数，并返回一个 bool 类型的值。</p>
+</li>
+<li>当函数名字作为值使用时，它会自动地转换成指针（有点像数组名字，不是吗）。因此，在函数指针的初始化或者复制的过程中，取值运算符是可选的。于是，上述两个定义语句是等价的。另一方面，函数指针作为函数调用使用时，它会自动转换成函数名（有点像数组指针，不是吗）</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">isEqual</span><span class="params">(<span class="keyword">int</span>, <span class="keyword">int</span>)</span></span>;</span><br><span class="line"><span class="keyword">bool</span> (*pfunc)(<span class="keyword">int</span>, <span class="keyword">int</span>) = isEqual;</span><br><span class="line"></span><br><span class="line"><span class="keyword">bool</span> res1 = isEqual(<span class="number">1</span>, <span class="number">2</span>);  <span class="comment">// 通过原函数名调用</span></span><br><span class="line"><span class="keyword">bool</span> res2 = (*pfunc)(<span class="number">1</span>, <span class="number">2</span>); <span class="comment">// 一个等价调用：通过函数指针，解引用调用</span></span><br><span class="line"><span class="keyword">bool</span> res3 = pfunc(<span class="number">1</span>, <span class="number">2</span>);    <span class="comment">// 另一个等价调用：函数指针自动转换成函数名</span></span><br></pre></td></tr></table></figure>
+<h2 id="将函数指针作为参数传入另一个函数"><a href="#将函数指针作为参数传入另一个函数" class="headerlink" title="将函数指针作为参数传入另一个函数"></a>将函数指针作为参数传入另一个函数</h2><ul>
+<li>函数不能拷贝，但函数指针可以<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">void addIfEqual(int lhs, int rhs, bool pfunc(int, int));</span><br><span class="line">                            <span class="comment">// addIfEqual 的第三个参数是一个函数定义</span></span><br><span class="line">                            <span class="comment">// 它会自动地转换成一个函数指针的参数</span></span><br><span class="line">void addIfEqual(int lhs, int rhs, bool (*pfunc)(int, int));</span><br><span class="line">                            <span class="comment">// 一个等价定义：显式地注明第三个参数是函数指针</span></span><br><span class="line">&gt;&gt;addIfEqual(<span class="number">1</span>, <span class="number">1</span>, isEqual);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="让函数返回一个函数的指针"><a href="#让函数返回一个函数的指针" class="headerlink" title="让函数返回一个函数的指针"></a>让函数返回一个函数的指针</h3><ul>
+<li>outer_return_type (*func(param_list))(outer_param_list)</li>
+<li>func(param_list) 是当前需要定义的函数；outer_return_type 和 outer_param_list 分别是当前定义的函数返回的函数指针对应函数的返回值类型和参数列表。</li>
+</ul>
+<h1 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h1><ul>
+<li>(<em>(void(</em>)())0)()：访问内存地址 0，将它作为一个参数列表和返回类型均为空的函数，并执行函数调用</li>
+<li>void(*pfunc)(); 定义了一个函数指针 pfunc，它指向的函数参数列表为空、返回值类型也为空</li>
+<li>类型强制转换符：<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(<span class="keyword">double</span>) c;     <span class="comment">// 将变量 c 强制转换为 double 类型</span></span><br><span class="line">(<span class="keyword">double</span> *) d;   <span class="comment">// 将变量 d 强制转换为 double * 类型</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>Thanks!</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>Donate</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechat.png" alt="Scarlett Huang WeChat Pay"/>
+        <p>WeChat Pay</p>
+      </div>
+    
+
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Computer-Science/" rel="tag"><i class="fa fa-tag"></i> Computer Science</a>
+          
+            <a href="/tags/C-C/" rel="tag"><i class="fa fa-tag"></i> C/C++</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/09/08/理解内存地址/" rel="next" title="理解内存地址">
+                <i class="fa fa-chevron-left"></i> 理解内存地址
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/09/08/结巴分词及其使用/" rel="prev" title="结巴分词及其使用">
+                结巴分词及其使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+
+
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="Scarlett Huang" />
+          <p class="site-author-name" itemprop="name">Scarlett Huang</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+           
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">192</span>
+                <span class="site-state-item-name">posts</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">35</span>
+                <span class="site-state-item-name">categories</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">62</span>
+                <span class="site-state-item-name">tags</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://www.scarletthuang.cn" target="_blank" title="Biography">
+                  
+                    <i class="fa fa-fw fa-user"></i>
+                  
+                    
+                      Biography
+                    
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/ScarlettYellow" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                    
+                      Github
+                    
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.woshipm.com/u/192348" target="_blank" title="WoShiPM">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                    
+                      WoShiPM
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Friend Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://unique-ailab.github.io/" title="Unique-AILab" target="_blank">Unique-AILab</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="hubertwang.me/" title="MR WHY (ML Dev. & AI PM)" target="_blank">MR WHY (ML Dev. & AI PM)</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://zekangli.com/" title="Zekang Li (NLP Researcher)" target="_blank">Zekang Li (NLP Researcher)</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://wondervictor.github.io/" title="Vic Chan (CV Dev.)" target="_blank">Vic Chan (CV Dev.)</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://blog.qzwlecr.com/" title="qzwlecr (Alg. Dev.)" target="_blank">qzwlecr (Alg. Dev.)</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://alisahhh.github.io/" title="Alisa (Alg. Dev.)" target="_blank">Alisa (Alg. Dev.)</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://llag9810.github.io/" title="yifan (Android Dev.)" target="_blank">yifan (Android Dev.)</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#数据、指令和内存"><span class="nav-number">1.</span> <span class="nav-text">数据、指令和内存</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#定义和使用指针"><span class="nav-number">2.</span> <span class="nav-text">定义和使用指针</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#指针的定义"><span class="nav-number">2.1.</span> <span class="nav-text">指针的定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#获取对象的地址"><span class="nav-number">2.2.</span> <span class="nav-text">获取对象的地址</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#访问指针指向的对象"><span class="nav-number">2.3.</span> <span class="nav-text">访问指针指向的对象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#空指针和空类型的指针"><span class="nav-number">2.4.</span> <span class="nav-text">空指针和空类型的指针</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#const与指针"><span class="nav-number">2.5.</span> <span class="nav-text">const与指针</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#指针与数组"><span class="nav-number">3.</span> <span class="nav-text">指针与数组</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#函数与指针"><span class="nav-number">3.1.</span> <span class="nav-text">函数与指针</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#让函数返回一个数组的指针"><span class="nav-number">3.1.1.</span> <span class="nav-text">让函数返回一个数组的指针</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#函数的指针"><span class="nav-number">3.1.2.</span> <span class="nav-text">函数的指针</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#将函数指针作为参数传入另一个函数"><span class="nav-number">3.2.</span> <span class="nav-text">将函数指针作为参数传入另一个函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#让函数返回一个函数的指针"><span class="nav-number">3.2.1.</span> <span class="nav-text">让函数返回一个函数的指针</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#其他"><span class="nav-number">4.</span> <span class="nav-text">其他</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+
+  </aside>
+
+
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+<%- partial('totop') %>
+<script src="<%- config.root %>js/totop.js"></script>
+
+<div class="copyright" >
+  
+  &copy;  2017 &mdash; 
+  <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Scarlett Huang</span>
+
+  
+</div>
+
+
+ <!-- <div class="powered-by">Powered by <a class="theme-link" href="https://hexo.io">Hexo</a></div>
+
+  <span class="post-meta-divider">|</span>
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.2</div>
+-->
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">共597.8k字</span>
+</div>
+
+
+
+
+<span id="busuanzi_container_site_pv">
+<div class="powered-by"></div>
+      本站总访问量<span id="busuanzi_value_site_pv"></span>次
+  </span>
+  <span id="busuanzi_container_site_uv">
+  <div class="powered-by"></div>
+    本站访客数<span id="busuanzi_value_site_uv"></span>人次
+  </span>
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://scarletthuang-blog.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://ScarlettHuang.cn/2017/09/08/理解C语言指针/';
+          this.page.identifier = '2017/09/08/理解C语言指针/';
+          this.page.title = '理解C语言指针';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://scarletthuang-blog.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+		<script type="text/javascript">
+		_hcwp = window._hcwp || [];
+
+		_hcwp.push({widget:"Bloggerstream", widget_id: 100332, selector:".hc-comment-count", label: "{\%COUNT%\}" });
+
+		
+		_hcwp.push({widget:"Stream", widget_id: 100332, xid: "2017/09/08/理解C语言指针/"});
+		
+
+		(function() {
+		if("HC_LOAD_INIT" in window)return;
+		HC_LOAD_INIT = true;
+		var lang = (navigator.language || navigator.systemLanguage || navigator.userLanguage || "en").substr(0, 2).toLowerCase();
+		var hcc = document.createElement("script"); hcc.type = "text/javascript"; hcc.async = true;
+		hcc.src = ("https:" == document.location.protocol ? "https" : "http")+"://w.hypercomments.com/widget/hc/100332/"+lang+"/widget.js";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hcc, s.nextSibling);
+		})();
+		</script>
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+  
+
+  
+  
+
+
+  
+
+  
+
+
+</body>
+</html>
